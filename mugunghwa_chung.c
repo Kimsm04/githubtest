@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <conio.h>
 #include <stdbool.h>
-
+#define TICK 100		// 0.1초
 // *: 벽
 // #: 영희
 // @: 뒤돌아본 영희
@@ -16,11 +16,18 @@ typedef enum _direction
 {
 	IDLE = 1, LEFT, UP, DOWN, RIGHT
 }direction;
-typedef enum _state {alive,dead,finished}state;
+typedef enum _state { alive, dead, finished }state;
+typedef struct _tickState
+{
+	double goalTick;
+	double cntTick;
+}tickState;
 void gotoxy(int row, int col);
 void draw(void);
-bool moveOn(point *, direction);	// 움직일 수 없으면 false, 있으면 움직이고 true 반환
-char map[9][41] = { 0, }, front[9][41] = { 0, };
+bool moveOn(point*, direction);	// 움직일 수 없으면 false, 있으면 움직이고 true 반환
+double getTick();
+void SayFlower();
+char map[9][40], front[9][40];
 bool running = true;
 
 int main() {
@@ -43,7 +50,9 @@ int main() {
 	// 참가자 위치 초기화
 	point pl[5] = { {38,2}, {38,3},{38,4},{38,5},{38,6} };
 	bool states[5] = { alive, };
-
+	tickState plTicks[5] = { {100,0}, {1000,0}, {400,0}, {3000,0}, {1600,0}, };
+	tickState tagger = {100,0};	// 영희
+	//random으로 하면 안되나
 	map[pl[0].y][pl[0].x] = '0';
 	map[pl[1].y][pl[1].x] = '1';
 	map[pl[2].y][pl[2].x] = '2';
@@ -51,11 +60,11 @@ int main() {
 	map[pl[4].y][pl[4].x] = '4';
 
 	while (running) {
-
 		draw();
 		//플레이어 조작
-		if ( states[0] == alive && _kbhit())
+		if (states[0] == alive && _kbhit() && plTicks[0].goalTick <= plTicks[0].cntTick)
 		{
+			plTicks[0].cntTick = 0;
 			int key = _getch();
 			switch (key)
 			{
@@ -84,10 +93,9 @@ int main() {
 		}
 		for (int i = 1; i < 5; i++)
 		{
-			if (states[i] == alive)
+			if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
 			{
-				// pl마다 개별 이동주기를 가짐
-				// 무궁화
+				plTicks[i].cntTick = 0;
 
 				int random = rand() % 10;
 				if (random == 0)
@@ -104,7 +112,18 @@ int main() {
 			}
 
 		}
-		Sleep(500);
+		
+		if (tagger.goalTick <= tagger.cntTick)
+		{
+			tagger.cntTick = 0;
+			SayFlower();
+		}
+
+		//tick 계산
+		double tick = getTick();
+		for (int i = 0; i < 5; i++) plTicks[i].cntTick += tick;
+		tagger.cntTick += tick;
+
 
 	}
 
@@ -127,17 +146,17 @@ bool moveOn(point* pt, direction dir)
 		break;
 
 	case UP:
-		if (map[pt->y-1][pt->x] != ' ')
+		if (map[pt->y - 1][pt->x] != ' ')
 			return false;
-		map[pt->y-1][pt->x] = map[pt->y][pt->x];
+		map[pt->y - 1][pt->x] = map[pt->y][pt->x];
 		map[pt->y][pt->x] = ' ';
 		pt->y -= 1;
 		break;
 
 	case DOWN:
-		if (map[pt->y+1][pt->x] != ' ')
+		if (map[pt->y + 1][pt->x] != ' ')
 			return false;
-		map[pt->y+1][pt->x] = map[pt->y][pt->x];
+		map[pt->y + 1][pt->x] = map[pt->y][pt->x];
 		map[pt->y][pt->x] = ' ';
 		pt->y += 1;
 		break;
@@ -152,10 +171,27 @@ bool moveOn(point* pt, direction dir)
 	}
 	return true;
 }
+double getTick()
+{
+	static double beforeClock = 0;
+	double temp = beforeClock;
+	beforeClock = clock();
+	return clock() - temp;
 
-
-
-
+}
+void SayFlower()
+{
+	static int cnt = 0;
+	const char* sentence = "무궁화꽃이피었습니다";
+	while (cnt < strlen(sentence))
+	{
+		gotoxy(10, cnt);
+		printf("%c%c", sentence[cnt],sentence[cnt+1]);
+		cnt += 2;
+		return;
+	}
+	cnt = 0;
+}
 void gotoxy(int row, int col) {
 	COORD pos = { col, row };
 	SetConsoleCursorPosition(
