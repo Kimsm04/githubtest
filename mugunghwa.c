@@ -3,17 +3,41 @@
 #include <conio.h>
 
 void gotoxy(int row, int col);
+void mugunghwa_print(void);
 void draw(void);
 
 char map[9][40], front[9][40];
-char mugunghwa[100] = "Â¹Â«Â±ÃƒÃˆÂ­Â²Ã‰Ã€ÃŒÃ‡Ã‡Â¾ÃºÂ½Ã€Â´ÃÂ´Ã™";
-char mugunghwa_f[100];
+char mugunghwa[20] = "¹«±ÃÈ­²ÉÀÌÇÇ¾ú½À´Ï´Ù";
+char mugunghwa_f[20] = {0};
 void gotoxy(int row, int col) {
 	COORD pos = { col, row };  
 	SetConsoleCursorPosition(
 		GetStdHandle(STD_OUTPUT_HANDLE),
 		pos
 	);
+}
+void mugunghwa_print(void) {
+	int speed = 2000;
+	for (int i = 0; i < 20; i = i + 2) {
+		if (mugunghwa_f[i] != mugunghwa[i] || mugunghwa_f[i + 1] != mugunghwa[i + 1]) {
+			printf("%c%c ", mugunghwa_f[i], mugunghwa_f[i + 1]);
+		}
+		Sleep(speed);
+		if (i < 10)
+			speed = 500;
+		else
+			speed -= 50;
+		if (_kbhit()) {
+			int key = _getch();
+			switch (key) {
+			case 'w':  break;
+			case 's':  break;
+			case 'a':  break;
+			case 'd':  break;
+			case 'q': return 0;
+			}
+		}
+	}
 }
 void draw(void) {
 	for (int i = 0; i < 9; i++) {
@@ -39,10 +63,11 @@ int main(void) {
 			}
 		}
 	}
-	map[3][1] = '#';
-	map[4][1] = '#';
-	map[5][1] = '#';
-
+	srand((unsigned int)time(NULL));
+	int AI_move1 = rand() % 10 +1;
+	int AI_move2 = rand() % 10 + 1;
+	int AI_move3 = rand() % 10 + 1;
+	int AI_move4 = rand() % 10 + 1;
 	map[2][38] = '0';
 	map[3][38] = '1';
 	map[4][38] = '2';
@@ -60,27 +85,16 @@ int main(void) {
 			case 'q': return 0;
 			}
 		}
+		map[3][1] = '#';
+		map[4][1] = '#';
+		map[5][1] = '#';
 		draw();
 		printf("\n");
-		int speed = 3000;
-		for (int i = 0; i < 20; i=i+2) {
-			printf("%c%c ", mugunghwa[i], mugunghwa[i + 1]);
-			Sleep(speed);
-			if (speed > 0) {
-				speed -= 300;
-				
-			}
-			if (_kbhit()) {
-				int key = _getch();
-				switch (key) {
-				case 'w':  break;
-				case 's':  break;
-				case 'a':  break;
-				case 'd':  break;
-				case 'q': return 0;
-				}
-			}
-		}
+		mugunghwa_print();
+		map[3][1] = '@';
+		map[4][1] = '@';
+		map[5][1] = '@';
+		draw();
 		Sleep(3000);
 		system("cls");
 	}
