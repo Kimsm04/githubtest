@@ -6,7 +6,7 @@ void gotoxy(int row, int col);
 void draw(void);
 
 char map[9][40], front[9][40];
-char mugunghwa[100] = "¹«±ÃÈ­²ÉÀÌÇÇ¾ú½À´Ï´Ù";
+char mugunghwa[100] = "Â¹Â«Â±ÃƒÃˆÂ­Â²Ã‰Ã€ÃŒÃ‡Ã‡Â¾ÃºÂ½Ã€Â´ÃÂ´Ã™";
 char mugunghwa_f[100];
 void gotoxy(int row, int col) {
 	COORD pos = { col, row };  
