@@ -3,6 +3,7 @@
 #include <time.h>
 #include <Windows.h>
 #include <conio.h>
+#include <stdbool.h>
 
 // *: 벽
 // #: 영희
@@ -11,17 +12,23 @@ typedef struct _point
 {
 	int x, y;
 }point;
+typedef enum _direction
+{
+	IDLE = 1, LEFT, UP, DOWN, RIGHT
+}direction;
+typedef enum _state {alive,dead,finished}state;
 void gotoxy(int row, int col);
 void draw(void);
-char map[9][40], front[9][40];
+bool moveOn(point *, direction);	// 움직일 수 없으면 false, 있으면 움직이고 true 반환
+char map[9][41] = { 0, }, front[9][41] = { 0, };
+bool running = true;
 
 int main() {
 	srand((unsigned int)time(NULL));
-
 	//맵 생성
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 40; j++) {
-			if (i == 0 || i== 8 || j == 0 || j == 39)	// 벽 생성
+			if (i == 0 || i == 8 || j == 0 || j == 39)	// 벽 생성
 				map[i][j] = '*';
 			else
 				map[i][j] = ' ';
@@ -34,164 +41,71 @@ int main() {
 	map[5][1] = '#';
 
 	// 참가자 위치 초기화
-	point pl = { 2,38 };
-	point ai[4] = { {3,38},{4,38},{5,38},{6,38} };
+	point pl[5] = { {38,2}, {38,3},{38,4},{38,5},{38,6} };
+	bool states[5] = { alive, };
 
-	point fP = { pl.x,pl.y };
-	point fAi[4] = { {ai[0].x,ai[0].y},{ai[1].x,ai[1].y},{ai[2].x,ai[2].y},{ai[3].x,ai[3].y}, };
+	map[pl[0].y][pl[0].x] = '0';
+	map[pl[1].y][pl[1].x] = '1';
+	map[pl[2].y][pl[2].x] = '2';
+	map[pl[3].y][pl[3].x] = '3';
+	map[pl[4].y][pl[4].x] = '4';
 
-	
-	map[pl.x][pl.y] = '0';
-	map[ai[0].x][ai[0].y] = '1';
-	map[ai[1].x][ai[1].y] = '2';
-	map[ai[2].x][ai[2].y] = '3';
-	map[ai[3].x][ai[3].y] = '4';
-
-	while (1) {
-		//AI 움직임 값생성
-		int AI_move1 = rand() % 10 ;
-		int AI_move2 = rand() % 10 ;
-		int AI_move3 = rand() % 10 ;
-		int AI_move4 = rand() % 10 ;
-
-		//플레이어
-		
+	while (running) {
 
 		draw();
 		//플레이어 조작
-		if (_kbhit()) {
+		if ( states[0] == alive && _kbhit())
+		{
 			int key = _getch();
-			switch (key) {
-			case 'w':p_x -= 1;
-				if (p_x > 0 && p_x < 8 && p_y > 0 && p_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || p_x != AI2_x || p_y != AI2_y || p_x != AI3_x || p_y != AI3_y || p_x != AI4_x || p_y != AI4_y)
-					 map[fp_x][fp_y] = ' '; fp_x = p_x, fp_y = p_y; map[p_x][p_y] = '0';}break;
+			switch (key)
+			{
+			case 'w':
+				moveOn(pl, UP);
+				break;
 
-			case 's': p_x += 1; 
-				if (p_x > 0 && p_x < 8 && p_y > 0 && p_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || p_x != AI2_x || p_y != AI2_y || p_x != AI3_x || p_y != AI3_y || p_x != AI4_x || p_y != AI4_y)
-					 map[fp_x][fp_y] = ' '; fp_x = p_x, fp_y = p_y; map[p_x][p_y] = '0';
-			} break;
+			case 's':
+				moveOn(pl, DOWN);
+				break;
 
-			case 'a': p_y -= 1; 
-				if (p_x > 0 && p_x < 8 && p_y > 0 && p_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || p_x != AI2_x || p_y != AI2_y || p_x != AI3_x || p_y != AI3_y || p_x != AI4_x || p_y != AI4_y)
-					 map[fp_x][fp_y] = ' '; fp_x = p_x, fp_y = p_y; map[p_x][p_y] = '0';
-			}break;
+			case 'a':
+				moveOn(pl, LEFT);
+				break;
 
-			case 'd':p_y += 1;
-				if (p_x > 0 && p_x < 8 && p_y > 0 && p_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || p_x != AI2_x || p_y != AI2_y || p_x != AI3_x || p_y != AI3_y || p_x != AI4_x || p_y != AI4_y)
-					 map[fp_x][fp_y] = ' '; fp_x = p_x, fp_y = p_y; map[p_x][p_y] = '0';
-			} break;
+			case 'd':
+				moveOn(pl, RIGHT);
+				break;
 
-			case 'q': return 0;
+			case 'q':
+				running = false;
+				break;
 			}
+			if ((pl[0].x == 1) || (pl[0].x == 2 && 3 <= pl[0].y && pl[0].y <= 5))
+				states[0] = finished;
 		}
-		//AI별 움직임 구현
-		// 가독성 너무 떨어지는데
-		//1player
-		if (1) {
-			switch (AI_move1) {
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6: if (AI1_x > 0 && AI1_x < 8 && AI1_y > 0 && AI1_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || AI1_x != AI2_x || AI1_y != AI2_y || AI1_x != AI3_x || AI1_y != AI3_y || AI1_x != AI4_x || AI1_y != AI4_y)
-					AI1_y -= 1; map[fAI1_x][fAI1_y] = ' '; fAI1_x = AI1_x, fAI1_y = AI1_y; map[AI1_x][AI1_y] = '1';
-			} break;
+		for (int i = 1; i < 5; i++)
+		{
+			if (states[i] == alive)
+			{
+				// pl마다 개별 이동주기를 가짐
+				// 무궁화
 
-			case 7: if (AI1_x != p_x || AI1_y != p_y || AI1_x > 0 && AI1_x < 8 && AI1_y > 0 && AI1_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || AI1_x != AI2_x || AI1_y != AI2_y || AI1_x != AI3_x || AI1_y != AI3_y || AI1_x != AI4_x || AI1_y != AI4_y)
-					AI1_x += 1; map[fAI1_x][fAI1_y] = ' '; fAI1_x = AI1_x, fAI1_y = AI1_y; map[AI1_x][AI1_y] = '1';
-			} break;
+				int random = rand() % 10;
+				if (random == 0)
+					moveOn(pl + i, IDLE);
+				else if (random == 1)
+					moveOn(pl + i, UP);
+				else if (random == 2)
+					moveOn(pl + i, DOWN);
+				else
+					moveOn(pl + i, LEFT);
 
-			case 8: if (AI1_x > 0 && AI1_x < 8 && AI1_y > 0 && AI1_y < 39) {
-				if (AI1_x != p_x || AI1_y != p_y || AI1_x != AI2_x || AI1_y != AI2_y || AI1_x != AI3_x || AI1_y != AI3_y || AI1_x != AI4_x || AI1_y != AI4_y)
-					AI1_x -= 1; map[fAI1_x][fAI1_y] = ' '; fAI1_x = AI1_x, fAI1_y = AI1_y; map[AI1_x][AI1_y] = '1';
-			} break;
-			case 9: break;
+				if ((pl[i].x == 1) || (pl[i].x == 2 && 3 <= pl[i].y && pl[i].y <= 5))
+					states[i] = finished;
 			}
 
-			//2player	
-			switch (AI_move2) {
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6: if (AI2_x > 0 && AI2_x < 8 && AI2_y > 0 && AI2_y < 39) {
-				if (AI2_x != p_x || AI2_y != p_y || AI1_x != AI2_x || AI1_y != AI2_y || AI2_x != AI3_x || AI2_y != AI3_y || AI2_x != AI4_x || AI2_y != AI4_y)
-					AI2_y -= 1; map[fAI2_x][fAI2_y] = ' '; fAI2_x = AI2_x, fAI2_y = AI2_y; map[AI2_x][AI2_y] = '2';
-			} break;
-
-			case 7: if (AI2_x > 0 && AI2_x < 8 && AI2_y > 0 && AI2_y < 39) {
-				if (AI2_x != p_x || AI2_y != p_y || AI1_x != AI2_x || AI1_y != AI2_y || AI2_x != AI3_x || AI2_y != AI3_y || AI2_x != AI4_x || AI2_y != AI4_y)
-					AI2_x += 1; map[fAI2_x][fAI2_y] = ' '; fAI2_x = AI2_x, fAI2_y = AI2_y; map[AI2_x][AI2_y] = '2';
-			} break;
-
-			case 8: if (AI2_x > 0 && AI2_x < 8 && AI2_y > 0 && AI2_y < 39) {
-				if (AI2_x != p_x || AI2_y != p_y || AI1_x != AI2_x || AI1_y != AI2_y || AI2_x != AI3_x || AI2_y != AI3_y || AI2_x != AI4_x || AI2_y != AI4_y)
-					AI2_x -= 1; map[fAI2_x][fAI2_y] = ' '; fAI2_x = AI2_x, fAI2_y = AI2_y; map[AI2_x][AI2_y] = '2';
-			}break;
-			case 9: break;
-			}
-
-			//3player
-			switch (AI_move3) {
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6: if (AI3_x > 0 && AI3_x < 8 && AI3_y > 0 && AI3_y < 39) {
-				if (AI3_x != p_x || AI3_y != p_y || AI3_x != AI1_x || AI3_y != AI1_y || AI3_x != AI2_x || AI3_y != AI2_y || AI3_x != AI4_x || AI3_y != AI4_y)
-					AI3_y -= 1; map[fAI3_x][fAI3_y] = ' '; fAI3_x = AI3_x, fAI3_y = AI3_y; map[AI3_x][AI3_y] = '3';
-			} break;
-
-			case 7: if (AI3_x > 0 && AI3_x < 8 && AI3_y > 0 && AI3_y < 39) {
-				if (AI3_x != p_x || AI3_y != p_y || AI3_x != AI1_x || AI3_y != AI1_y || AI3_x != AI2_x || AI3_y != AI2_y || AI3_x != AI4_x || AI3_y != AI4_y)
-					AI3_x += 1; map[fAI3_x][fAI3_y] = ' '; fAI3_x = AI3_x, fAI3_y = AI3_y; map[AI3_x][AI3_y] = '3';
-			} break;
-
-			case 8: if (AI3_x > 0 && AI3_x < 8 && AI3_y > 0 && AI3_y < 39) {
-				if (AI3_x != p_x || AI3_y != p_y || AI3_x != AI1_x || AI3_y != AI1_y || AI3_x != AI2_x || AI3_y != AI2_y || AI3_x != AI4_x || AI3_y != AI4_y)
-					AI3_x -= 1; map[fAI3_x][fAI3_y] = ' '; fAI3_x = AI3_x, fAI3_y = AI3_y; map[AI3_x][AI3_y] = '3';
-			}break;
-			case 9: break;
-			}
-
-			//4player
-			switch (AI_move4) {
-			case 0:
-			case 1:
-			case 2:
-			case 3:
-			case 4:
-			case 5:
-			case 6: if (AI4_x > 0 && AI4_x < 8 && AI4_y > 0 && AI4_y < 39) {
-				if (AI4_x != p_x || AI4_y != p_y || AI4_x != AI1_x || AI4_y != AI1_y || AI4_x != AI2_x || AI4_y != AI2_y || AI3_x != AI4_x || AI3_y != AI4_y)
-					AI4_y -= 1; map[fAI4_x][fAI4_y] = ' '; fAI4_x = AI4_x, fAI4_y = AI4_y; map[AI4_x][AI4_y] = '4';
-			} break;
-
-			case 7: if (AI4_x > 0 && AI4_x < 8 && AI4_y > 0 && AI4_y < 39) {
-				if (AI4_x != p_x || AI4_y != p_y || AI4_x != AI1_x || AI4_y != AI1_y || AI4_x != AI2_x || AI4_y != AI2_y || AI3_x != AI4_x || AI3_y != AI4_y)
-					AI4_x += 1; map[fAI4_x][fAI4_y] = ' '; fAI4_x = AI4_x, fAI4_y = AI4_y; map[AI4_x][AI4_y] = '4';
-			}break;
-
-			case 8: if (AI4_x > 0 && AI4_x < 8 && AI4_y > 0 && AI4_y < 39) {
-				if (AI4_x != p_x || AI4_y != p_y || AI4_x != AI1_x || AI4_y != AI1_y || AI4_x != AI2_x || AI4_y != AI2_y || AI3_x != AI4_x || AI3_y != AI4_y)
-					AI4_x -= 1; map[fAI4_x][fAI4_y] = ' '; fAI4_x = AI4_x, fAI4_y = AI4_y; map[AI4_x][AI4_y] = '4';
-			}break;
-			case 9: break;
-			}
-			Sleep(500);
 		}
+		Sleep(500);
+
 	}
 
 	return 0;
@@ -200,7 +114,44 @@ int main() {
 
 
 
+bool moveOn(point* pt, direction dir)
+{
+	switch (dir)
+	{
+	case LEFT:
+		if (map[pt->y][pt->x - 1] != ' ')
+			return false;
+		map[pt->y][pt->x - 1] = map[pt->y][pt->x];
+		map[pt->y][pt->x] = ' ';
+		pt->x -= 1;
+		break;
 
+	case UP:
+		if (map[pt->y-1][pt->x] != ' ')
+			return false;
+		map[pt->y-1][pt->x] = map[pt->y][pt->x];
+		map[pt->y][pt->x] = ' ';
+		pt->y -= 1;
+		break;
+
+	case DOWN:
+		if (map[pt->y+1][pt->x] != ' ')
+			return false;
+		map[pt->y+1][pt->x] = map[pt->y][pt->x];
+		map[pt->y][pt->x] = ' ';
+		pt->y += 1;
+		break;
+
+	case RIGHT:
+		if (map[pt->y][pt->x + 1] != ' ')
+			return false;
+		map[pt->y][pt->x + 1] = map[pt->y][pt->x];
+		map[pt->y][pt->x] = ' ';
+		pt->x += 1;
+		break;
+	}
+	return true;
+}
 
 
 
