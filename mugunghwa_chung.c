@@ -98,24 +98,26 @@ int main() {
 		}
 		for (int i = 1; i < 5; i++)
 		{
-			if( isWatching != true || rand()%10 == 0)	// 보고 있지않거나, 보고있더라고 10%의 확률로 실행
-			if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
-			{
-				plTicks[i].cntTick = 0;
+				if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
+				{
+					plTicks[i].cntTick = 0;
+					if (isWatching == false || (rand()%10 == 0))	// 보고 있지않거나, 보고있더라고 10%의 확률로 실행
+					{
+						int random = rand() % 10;
+						if (random == 0)
+							moveOn(pl + i, IDLE);
+						else if (random == 1)
+							moveOn(pl + i, UP);
+						else if (random == 2)
+							moveOn(pl + i, DOWN);
+						else
+							moveOn(pl + i, LEFT);
 
-				int random = rand() % 10;
-				if (random == 0)
-					moveOn(pl + i, IDLE);
-				else if (random == 1)
-					moveOn(pl + i, UP);
-				else if (random == 2)
-					moveOn(pl + i, DOWN);
-				else
-					moveOn(pl + i, LEFT);
-
-				if ((pl[i].x == 1) || (pl[i].x == 2 && 3 <= pl[i].y && pl[i].y <= 5))
-					states[i] = finished;
-			}
+						if ((pl[i].x == 1) || (pl[i].x == 2 && 3 <= pl[i].y && pl[i].y <= 5))
+							states[i] = finished;
+					}
+				}
+			
 
 		}
 		
@@ -173,6 +175,7 @@ int main() {
 
 	}
 	draw();
+	playerDialog();
 	return 0;
 }
 
