@@ -4,9 +4,7 @@
 #include <Windows.h>
 #include <conio.h>
 #include <stdbool.h>
-// *: 벽
-// #: 영희
-// @: 뒤돌아본 영희
+
 typedef struct _point
 {
 	int x, y;
@@ -52,9 +50,9 @@ int main() {
 	// 참가자 위치 초기화
 	point pl[5] = { {38,2}, {38,3},{38,4},{38,5},{38,6} };
 
-	tickState plTicks[5] = { {0,0}, {100,0}, {400,0}, {200,0}, {800,0}, };
-	tickState taggerSaying = {100,0};	// 영희
-	tickState taggerWatching = {3000,0}; // d영희
+	tickState plTicks[5] = { {0,0}, {200,0}, {400,0}, {600,0}, {800,0}, };
+	tickState taggerSaying = { 100,0 };	// 영희
+	tickState taggerWatching = { 3000,0 }; // d영희
 	bool isWatching = false;
 
 	map[pl[0].y][pl[0].x] = '0';
@@ -67,26 +65,30 @@ int main() {
 		draw();
 		playerDialog();
 		//플레이어 조작
-		if (states[0] == alive && _kbhit() && plTicks[0].goalTick <= plTicks[0].cntTick)
+		if (_kbhit() && plTicks[0].goalTick <= plTicks[0].cntTick)
 		{
 			plTicks[0].cntTick = 0;
 			int key = _getch();
 			switch (key)
 			{
 			case 'w':
-				moveOn(pl, UP);
+				if (states[0] == alive)
+					moveOn(pl, UP);
 				break;
 
 			case 's':
-				moveOn(pl, DOWN);
+				if (states[0] == alive)
+					moveOn(pl, DOWN);
 				break;
 
 			case 'a':
-				moveOn(pl, LEFT);
+				if (states[0] == alive)
+					moveOn(pl, LEFT);
 				break;
 
 			case 'd':
-				moveOn(pl, RIGHT);
+				if (states[0] == alive)
+					moveOn(pl, RIGHT);
 				break;
 
 			case 'q':
@@ -98,29 +100,29 @@ int main() {
 		}
 		for (int i = 1; i < 5; i++)
 		{
-				if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
+			if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
+			{
+				plTicks[i].cntTick = 0;
+				if (isWatching == false || (rand() % 10 == 0))	// 보고 있지않거나, 보고있더라고 10%의 확률로 실행
 				{
-					plTicks[i].cntTick = 0;
-					if (isWatching == false || (rand()%10 == 0))	// 보고 있지않거나, 보고있더라고 10%의 확률로 실행
-					{
-						int random = rand() % 10;
-						if (random == 0)
-							moveOn(pl + i, IDLE);
-						else if (random == 1)
-							moveOn(pl + i, UP);
-						else if (random == 2)
-							moveOn(pl + i, DOWN);
-						else
-							moveOn(pl + i, LEFT);
+					int random = rand() % 10;
+					if (random == 0)
+						moveOn(pl + i, IDLE);
+					else if (random == 1)
+						moveOn(pl + i, UP);
+					else if (random == 2)
+						moveOn(pl + i, DOWN);
+					else
+						moveOn(pl + i, LEFT);
 
-						if ((pl[i].x == 1) || (pl[i].x == 2 && 3 <= pl[i].y && pl[i].y <= 5))
-							states[i] = finished;
-					}
+					if ((pl[i].x == 1) || (pl[i].x == 2 && 3 <= pl[i].y && pl[i].y <= 5))
+						states[i] = finished;
 				}
-			
+			}
+
 
 		}
-		
+
 		// 무궁화꽃이 피었습니다 출력
 		if (isWatching)
 		{
@@ -162,28 +164,33 @@ int main() {
 				if (20 <= cnt)
 					isWatching = true;
 			}
-			
+
 		}
-		
+
 		//tick 계산
 		double tick = getTick();
 		for (int i = 0; i < 5; i++) plTicks[i].cntTick += tick;
 		taggerSaying.cntTick += tick;
-		if(isWatching) taggerWatching.cntTick += tick;
+		if (isWatching) taggerWatching.cntTick += tick;
 
-		int leftPlayer = 5;
+		int leftPlayer = 0;
+		int deadPlayer = 0;
 		for (int i = 0; i < 5; i++)
-			if (states[i] == dead)
-			{
-				leftPlayer--;
-				if (leftPlayer <= 1)
-					running = false;
-			}
-			
+			if (states[i] == alive)
+				leftPlayer++;
+			else if (states[i] == dead)
+				deadPlayer++;
+		if (leftPlayer <= 1)
+			if (leftPlayer == 1 && deadPlayer == 4)
+				running = false;
+			else if (leftPlayer == 0)
+				running = false;
+
 
 	}
 	draw();
 	playerDialog();
+	gotoxy(20, 0);
 	return 0;
 }
 
@@ -243,7 +250,7 @@ int SayFlower()
 	while (cnt < strlen(sentence))
 	{
 		gotoxy(10, cnt);
-		printf("%c%c", sentence[cnt],sentence[cnt+1]);
+		printf("%c%c", sentence[cnt], sentence[cnt + 1]);
 		cnt += 2;
 		return cnt;
 	}
@@ -251,12 +258,12 @@ int SayFlower()
 	return cnt;
 }
 void playerDialog() {
-	static int fplayerCnt=0;
+	static int fplayerCnt = 0;
 	int playerCnt = 5;
 	for (int i = 0; i < 5; i++)
 		if (states[i] == dead)
 			playerCnt--;
-	
+
 	if (fplayerCnt != playerCnt)
 	{
 		gotoxy(14, 0);
@@ -270,10 +277,12 @@ void playerDialog() {
 			fStates[i] = states[i];
 			gotoxy(15 + i, 0);
 			printf("player %d: ", i);
-			if (states[i] == dead)
+			if (states[i] == alive)
+				printf("alive\n");
+			else if (states[i] == dead)
 				printf("dead!\n");
 			else
-				printf("alive\n");
+				printf("finished\n");
 		}
 	}
 }
