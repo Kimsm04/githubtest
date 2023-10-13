@@ -17,6 +17,8 @@ typedef enum _direction
 	IDLE = 1, LEFT, UP, DOWN, RIGHT
 }direction;
 typedef enum _state { alive, dead, finished }state;
+typedef struct {char state[20];}STATE;
+typedef struct {int live; }LIVE;
 typedef struct _tickState
 {
 	double goalTick;
@@ -27,11 +29,13 @@ void draw(void);
 bool moveOn(point*, direction);	// 움직일 수 없으면 false, 있으면 움직이고 true 반환
 double getTick();
 void SayFlower();
+void p_alive(void);
 char map[9][40], front[9][40];
 bool running = true;
 
 int main() {
 	srand((unsigned int)time(NULL));
+	
 	//맵 생성
 	for (int i = 0; i < 9; i++) {
 		for (int j = 0; j < 40; j++) {
@@ -50,6 +54,7 @@ int main() {
 	// 참가자 위치 초기화
 	point pl[5] = { {38,2}, {38,3},{38,4},{38,5},{38,6} };
 	bool states[5] = { alive, };
+
 	tickState plTicks[5] = { {100,0}, {1000,0}, {400,0}, {3000,0}, {1600,0}, };
 	tickState tagger = {100,0};	// 영희
 	//random으로 하면 안되나
@@ -59,8 +64,17 @@ int main() {
 	map[pl[3].y][pl[3].x] = '3';
 	map[pl[4].y][pl[4].x] = '4';
 
+	p_alive();
+	bool fstates[5] = { alive, };
 	while (running) {
 		draw();
+		for(int i=0;i<5;i++)
+			if (states[i] == dead) {
+				if (fstates[i] != dead) {
+					p_alive(i);
+					fstates[i] = dead;
+				}
+			}
 		//플레이어 조작
 		if (states[0] == alive && _kbhit() && plTicks[0].goalTick <= plTicks[0].cntTick)
 		{
@@ -91,6 +105,7 @@ int main() {
 			if ((pl[0].x == 1) || (pl[0].x == 2 && 3 <= pl[0].y && pl[0].y <= 5))
 				states[0] = finished;
 		}
+		//ai
 		for (int i = 1; i < 5; i++)
 		{
 			if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
@@ -129,9 +144,6 @@ int main() {
 
 	return 0;
 }
-
-
-
 
 bool moveOn(point* pt, direction dir)
 {
@@ -178,6 +190,18 @@ double getTick()
 	beforeClock = clock();
 	return clock() - temp;
 
+}
+void p_alive(i) {
+	STATE state_arr[2] = { {"alive" }, { "dead " } };
+	static LIVE live_arr[5] = { {0},{0},{0},{0} ,{0} };
+	live_arr[i].live = 1;
+	gotoxy(14,0);
+	printf("no. of players left: 5\n");
+	printf("player 0: %s\n", state_arr[live_arr[0].live]);
+	printf("player 1: %s\n", state_arr[live_arr[1].live]);
+	printf("player 2: %s\n", state_arr[live_arr[2].live]);
+	printf("player 3: %s\n", state_arr[live_arr[3].live]);
+	printf("player 4: %s\n", state_arr[live_arr[4].live]);
 }
 void SayFlower()
 {
