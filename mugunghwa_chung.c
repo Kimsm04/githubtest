@@ -52,7 +52,7 @@ int main() {
 	// 참가자 위치 초기화
 	point pl[5] = { {38,2}, {38,3},{38,4},{38,5},{38,6} };
 
-	tickState plTicks[5] = { {100,0}, {1000,0}, {400,0}, {3000,0}, {1600,0}, };
+	tickState plTicks[5] = { {0,0}, {100,0}, {400,0}, {200,0}, {800,0}, };
 	tickState taggerSaying = {100,0};	// 영희
 	tickState taggerWatching = {3000,0}; // d영희
 	bool isWatching = false;
@@ -147,12 +147,18 @@ int main() {
 			if (taggerSaying.goalTick <= taggerSaying.cntTick)
 			{
 				int cnt = SayFlower();
-				if (cnt < 10)
-					taggerSaying.cntTick = taggerSaying.goalTick * (1 - (cnt + rand() % 11) * 0.1);	//0.5~0.1
+				if (cnt < 10) {
+					if (cnt == 0)
+						taggerSaying.goalTick = 1000;
+					taggerSaying.goalTick += rand() % 200;
+				}
 				else
-					taggerSaying.cntTick = taggerSaying.goalTick * ((cnt - 15 + rand() % 11) * 0.1);	//0.5 ~ 1
-				//tagger.cntTick = 0;
-				taggerSaying.goalTick += 100;
+				{
+					if (cnt == 10)
+						taggerSaying.goalTick = 1000;
+					taggerSaying.goalTick -= rand() % 300;
+				}
+				taggerSaying.cntTick = 0;
 				if (20 <= cnt)
 					isWatching = true;
 			}
@@ -165,13 +171,15 @@ int main() {
 		taggerSaying.cntTick += tick;
 		if(isWatching) taggerWatching.cntTick += tick;
 
-		for (int i = 0; i <= 5; i++)
-			if (i == 5)
-				running = false;
-			else if(states[i] != alive)
-				continue;
-			else
-				break;
+		int leftPlayer = 5;
+		for (int i = 0; i < 5; i++)
+			if (states[i] == dead)
+			{
+				leftPlayer--;
+				if (leftPlayer <= 1)
+					running = false;
+			}
+			
 
 	}
 	draw();
@@ -281,7 +289,8 @@ void killPlayer()
 					if ('0' <= map[i][k] && map[i][k] <= '9')
 						states[map[i][j] - '0'] = alive;
 				}
-
+				if (states[map[i][j] - '0'] == dead)
+					map[i][j] = ' ';
 			}
 }
 void gotoxy(int row, int col) {
