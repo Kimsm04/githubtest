@@ -31,9 +31,8 @@ void killPlayer();
 bool running = true;
 point* pl;				// 플레이어 위치들
 tickState* plTicks;		// 플레이어 이동 주기
-state* states;
-state* fStates;
-int taggerY;
+state* states;			// 플레이어 상태 (alive, dead, finished)
+int taggerY;			// 영희 세로 위치
 
 
 void mugunghwa() {
@@ -56,7 +55,6 @@ void mugunghwa() {
 	pl = (point*)malloc(sizeof(point) * n_player);
 	plTicks = (tickState*)malloc(sizeof(tickState) * n_player);
 	states = (state*)malloc(sizeof(state)*n_player);
-	fStates = (state*)malloc(sizeof(state) * n_player);
 
 	tickState taggerSaying = { 100,0 };	// 영희가 말하고 있는 시간 설정
 	tickState taggerWatching = { 3000,0 }; // 영희가 바라보고 있는 시간 설정
@@ -83,7 +81,6 @@ void mugunghwa() {
 
 		// 플레이어 상태 설정
 		states[i] = alive;
-		fStates[i] = -1;
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -199,29 +196,27 @@ void mugunghwa() {
 
 
 		// 게임 종료 조건 여부 확인
-		int leftPlayer = 0;
-		int deadPlayer = 0;
+		int finishedN = 0;
 		for (int i = 0; i < n_player; i++)
-			if (states[i] == alive)
-				leftPlayer++;
-			else if (states[i] == dead)
-				deadPlayer++;
-		if (leftPlayer <= 1)
-			if (leftPlayer == 1 && deadPlayer == 4)
-				running = false;
-			else if (leftPlayer == 0)
-				running = false;
-		
+			if (states[i] == finished)
+				finishedN++;
+		if (finishedN == n_alive)	// 클리어한 사람 수와 살아있는 플레이어 수가 같으면 게임 종료
+			running = false;
+		else if (n_alive <= 1 && finishedN == 0) // 아무도 클리어하지 않았고 플레이어 수가 1명 이하면 게임 종료
+			running = false;
+		else if (finishedN == n_player)	// 그럴리는 없겠지만 다 도착했을 경우
+			running = false;
 
 
 	}
 	display();
-	gotoxy(20, 0);
+	gotoxy(ROW_MAX+3, 0);
+	dialog("Hello World");
 }
 
 
 
-// 해당 사항 없음
+
 bool moveOn(point* pt, direction dir)
 {
 	switch (dir)
@@ -261,7 +256,7 @@ bool moveOn(point* pt, direction dir)
 	return true;
 }
 
-// 해당 사항 없음
+
 double getTick()
 {
 	static double beforeClock = 0;
@@ -289,7 +284,7 @@ int SayFlower()
 void checkFinished()
 {
 	for(int i =0;i<n_player;i++)
-		if ((pl[i].x == 1) || (pl[i].x == 2 && taggerY - 1 <= pl[i].y && pl[i].y <= taggerY + 1))
+		if (states[i] == alive && ((pl[i].x == 1) || (pl[i].x == 2 && taggerY - 1 <= pl[i].y && pl[i].y <= taggerY + 1)))
 			states[i] = finished;
 }
 void killPlayer()
@@ -298,18 +293,23 @@ void killPlayer()
 		for (int j = 0; j < N_COL; j++)
 			if (front_buf[i][j] != back_buf[i][j] && back_buf[i][j] != '#' && back_buf[i][j] != '@')
 			{
-				// 위치가 바뀐 플레이어는 dead상태로 전환
-				states[back_buf[i][j] - '0'] = dead;
-
-				for (int k = j - 1; 0 < k; k--)
+				if ('0' <= back_buf[i][j] && back_buf[i][j] <= '9')
 				{
-					// 단, 앞에 사람이 있으면 괜춘
-					if ('0' <= back_buf[i][k] && back_buf[i][k] <= '9')
-						states[back_buf[i][j] - '0'] = alive;
-				}
+					// 위치가 바뀐 플레이어는 dead상태로 전환
+					states[back_buf[i][j] - '0'] = dead;
 
-				// 
-				if (states[back_buf[i][j] - '0'] == dead)
-					back_buf[i][j] = ' ';
+					for (int k = j - 1; 1 < k; k--)
+					{
+						// 단, 앞에 사람이 있으면 괜춘
+						if ('0' <= back_buf[i][k] && back_buf[i][k] <= '9')
+							states[back_buf[i][j] - '0'] = alive;
+					}
+					if (states[back_buf[i][j] - '0'] == dead)
+					{
+						player[back_buf[i][j] - '0'] = false;
+						back_buf[i][j] = ' ';
+						n_alive--;
+					}
+				}
 			}
 }
