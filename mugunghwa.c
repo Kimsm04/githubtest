@@ -207,11 +207,10 @@ void mugunghwa() {
 		else if (finishedN == n_player)	// 그럴리는 없겠지만 다 도착했을 경우
 			running = false;
 
-
+		
 	}
 	display();
 	gotoxy(ROW_MAX+3, 0);
-	dialog("Hello World");
 }
 
 
@@ -285,7 +284,10 @@ void checkFinished()
 {
 	for(int i =0;i<n_player;i++)
 		if (states[i] == alive && ((pl[i].x == 1) || (pl[i].x == 2 && taggerY - 1 <= pl[i].y && pl[i].y <= taggerY + 1)))
+		{
+			back_buf[pl[i].y][pl[i].x] = ' ';
 			states[i] = finished;
+		}
 }
 void killPlayer()
 {
