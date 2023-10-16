@@ -16,19 +16,20 @@ typedef enum _direction
 {
 	IDLE = 1, LEFT, UP, DOWN, RIGHT
 }direction;
-typedef enum _state { alive, dead, finished }state;
+typedef enum _state { alive, dead, finished }state;		// 각 플레이어들의 상태를 나타내는 자료형
 typedef struct _tickState
 {
 	double goalTick;	// 트리거틱
 	double cntTick;		// 현재 틱
-}tickState;
-bool moveOn(point*, direction);
-double getTick();
-int SayFlower();
-void checkFinished();
-void killPlayer();
+}tickState;		// 이벤트를 발생시키는 주기를 조절하기 위한 자료형
 
-bool running = true;
+bool moveOn(point*, direction);	// 플레이어 이동
+double getTick();		// Tick계산
+int SayFlower();		// 무궁화꽃이피었습니다.  출력
+void checkFinished();	// 플레이어가 골인지점에 도착하면 finised 처리
+void killPlayer();		// 영희가 뒤돌아봤을 때 플레이어가 움직이면 dead 처리
+
+bool running = true;	// 게임 반복문 실행 여부
 point* pl;				// 플레이어 위치들
 tickState* plTicks;		// 플레이어 이동 주기
 state* states;			// 플레이어 상태 (alive, dead, finished)
@@ -46,22 +47,22 @@ void mugunghwa() {
 	else {
 		map_init(9, 40);
 	}
+
+	// 영희 생성
 	taggerY = N_ROW / 2;
 	back_buf[taggerY-1] [1] = '#';
 	back_buf[taggerY][1] = '#';
 	back_buf[taggerY+1][1] = '#';
-	
+	tickState taggerSaying = { 100,0 };	// 영희가 말하고 있는 시간 설정
+	tickState taggerWatching = { 3000,0 }; // 영희가 바라보고 있는 시간 설정
+	bool isWatching = false;		// 영희는 처음에 앞을 보고 있다
 
+	// 플레이어 위치 및 이동주기 및 상태 설정
 	pl = (point*)malloc(sizeof(point) * n_player);
 	plTicks = (tickState*)malloc(sizeof(tickState) * n_player);
 	states = (state*)malloc(sizeof(state)*n_player);
-
-	tickState taggerSaying = { 100,0 };	// 영희가 말하고 있는 시간 설정
-	tickState taggerWatching = { 3000,0 }; // 영희가 바라보고 있는 시간 설정
-	bool isWatching = false;
-
-	// 플레이어 위치 및 이동주기 및 상태 설정
-	for (int i = 0; i < n_player; i++) {
+	for (int i = 0; i < n_player; i++) 
+	{
 		// 플레이어들 위치 설정
 		pl[i].x = 38;
 		pl[i].y = 2+i;
@@ -117,12 +118,13 @@ void mugunghwa() {
 		// AI 이동 처리
 		for (int i = 1; i < n_player; i++)
 		{
+			// 캐릭터가 살아있는 상태고, 현재 틱이 이벤트 발생 틱을 넘어서면...
 			if (states[i] == alive && plTicks[i].goalTick <= plTicks[i].cntTick)
 			{
 				plTicks[i].cntTick = 0;
-				if (isWatching == false || (rand() % 10 == 0))	// ���� �����ʰų�, �����ִ���� 10%�� Ȯ���� ����
+				if (isWatching == false || (rand() % 100 == 0))	// 영희가 바라보면 100의 1확률로 움직인다.
 				{
-					int random = rand() % 10;
+					int random = rand() % 10;	
 					if (random == 0)
 						moveOn(pl + i, IDLE);
 					else if (random == 1)
@@ -150,8 +152,6 @@ void mugunghwa() {
 				back_buf[N_ROW / 2 - 1][1] = '#';
 				back_buf[N_ROW / 2][1] = '#';
 				back_buf[N_ROW / 2 + 1][1] = '#';
-				gotoxy(N_ROW + 1, 0);
-				printf("                                                               ");
 			}
 			else
 			{
@@ -202,9 +202,9 @@ void mugunghwa() {
 				finishedN++;
 		if (finishedN == n_alive)	// 클리어한 사람 수와 살아있는 플레이어 수가 같으면 게임 종료
 			running = false;
-		else if (n_alive <= 1 && finishedN == 0) // 아무도 클리어하지 않았고 플레이어 수가 1명 이하면 게임 종료
+		else if (n_alive <= 1 && finishedN == 0) // 아무도 클리어하지 못했고, 플레이어 수가 1명 이하면 게임 종료
 			running = false;
-		else if (finishedN == n_player)	// 그럴리는 없겠지만 다 도착했을 경우
+		else if (finishedN == n_player)	// 다 도착했을 경우, 게임 종료
 			running = false;
 
 		
@@ -269,6 +269,11 @@ int SayFlower()
 {
 	static int cnt = 0;
 	const char* sentence = "무궁화꽃이피었습니다";
+	if (cnt == 0)	// 무궁화꽃이피었습니다 출력한 거 지우기
+	{
+		gotoxy(N_ROW + 1, 0);
+		printf("                                                               ");
+	}
 	while (cnt < strlen(sentence))
 	{
 		gotoxy(N_ROW + 1, cnt);
@@ -302,7 +307,7 @@ void killPlayer()
 
 					for (int k = j - 1; 1 < k; k--)
 					{
-						// 단, 앞에 사람이 있으면 괜춘
+						// 단, 앞에 사람이 있으면 alive상태로 다시 전환
 						if ('0' <= back_buf[i][k] && back_buf[i][k] <= '9')
 							states[back_buf[i][j] - '0'] = alive;
 					}
