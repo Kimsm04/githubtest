@@ -93,11 +93,11 @@ void print_status(void) {
 	printf("no. of players left: %d\n", n_alive);
 	printf("		   intl     str     stm\n");
 	for (int p = 0; p < n_player; p++) {
-		printf("player %2d: %5s %3d(+%d) %3d(+%d) %3d %%\n",
+		printf("player %2d: %5s %3d(+%d) %3d(+%d) %3d %% iname : %s\n",
 			p, player[p].is_alive ? "alive" : "DEAD",
-			player[p].intel, item[p].intel_buf,
-			player[p].str, item[p].str_buf,
-			player[p].stamina);
+			player[p].intel, player[p].item.intel_buf,
+			player[p].str, player[p].item.str_buf,
+			player[p].stamina,player[p]);
 		
 	}
 }

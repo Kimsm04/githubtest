@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "jjuggumi.h"
 #include "canvas.h"
 #include "keyin.h"
@@ -17,6 +18,8 @@
 void init_nightgame();
 void item_spawn();
 void chocie();
+void depredation(int , int );
+void conciliate(int , int );
 void move_manual(key_t key);
 void move_random(int i, int dir);
 void move_tail(int i, int nx, int ny);
@@ -60,6 +63,30 @@ void item_spawn() {
 }
 
 void chocie() {
+	int number;
+	printf("선택지(1.강탈시도(str) /2.회유시도(int) /3.무시 ) : ");
+	scanf_s("%d", &number);
+	switch (number) {
+	case 1:  break;
+	case 2: break;	
+	case 3: break;
+	}
+}
+
+void deperdation(int p1,int p2) {
+	int p1_str = player[p1].str + item[p1].str_buf;
+	int p2_str = player[p2].str + item[p2].str_buf;
+	if (p1_str > p2_str && player[p1].stamina > 0) {
+		if (player[p1].hasitem == true) {
+		}
+		player[p1].stamina -= 40;
+	}
+	else if (p1_str < p2_str && player[p1].stamina > 0) {
+		player[p1].stamina -= 60;
+	}
+}
+
+void conciliate(int p1, int p2) {
 
 }
 
@@ -85,6 +112,10 @@ void move_manual(key_t key) {
 		if (player[0].hasitem == false) {
 			player[0].item;
 			player[0].hasitem = true;
+			strncpy(player[0].item.name,item[item_buf[nx][ny]].name,100);
+			player[0].item.intel_buf = item[item_buf[nx][ny]].intel_buf;
+			player[0].item.str_buf = item[item_buf[nx][ny]].str_buf;
+			player[0].item.stamina_buf = item[item_buf[nx][ny]].stamina_buf;
 		}
 		else if (player[0].hasitem = true) {
 			if (!placable(nx, ny)) {

@@ -1,4 +1,4 @@
-ï»¿#include "jjuggumi.h"
+#include "jjuggumi.h"
 #include "canvas.h"
 #include "keyin.h"
 #include <stdio.h>
@@ -14,8 +14,8 @@ int surPlayers = 0;
 int round = 1;
 void question(void);
 void randq(void);
-int cursorRow = 2;   // ì´ˆê¸° ì»¤ì„œ í–‰ ìœ„ì¹˜
-int cursorCol = 1;   // ì´ˆê¸° ì»¤ì„œ ì—´ ìœ„ì¹˜
+int cursorRow = 2;   // ÃÊ±â Ä¿¼­ Çà À§Ä¡
+int cursorCol = 1;   // ÃÊ±â Ä¿¼­ ¿­ À§Ä¡
 bool start = true;
 char log[50];
 void jebi() {
@@ -28,15 +28,14 @@ void jebi() {
 	else {
 		map_init(5, 18);
 	}
-	// map ì¶œë ¥ í•¨ìˆ˜ ì˜ˆì‹œ
+	// map Ãâ·Â ÇÔ¼ö ¿¹½Ã
 	
 
-	for (int i = 0; i < n_player; i++) {   //ë‚¨ì€ í”Œë ˆì´ì–´ ìˆ˜ ì„¸ê¸°
+	for (int i = 0; i < n_player; i++) {   //³²Àº ÇÃ·¹ÀÌ¾î ¼ö ¼¼±â
 		if (player[i].is_alive == true)
 			surPlayers++;
 	}
 	int start = true;
-	n_alive = n_player;
 	while (start) {
 		if (5 < n_player) {
 			map_init(5, 18 + n_player);
@@ -45,7 +44,7 @@ void jebi() {
 			map_init(5, 18);
 		}
 		gotoxy(6, 0);
-		printf("Round %d,", round);  //ë¼ìš´ë“œ ì¹´ìš´íŠ¸
+		printf("Round %d,", round);  //¶ó¿îµå Ä«¿îÆ®
 		round++;
 		gotoxy(6, 10);
 
@@ -59,7 +58,7 @@ void jebi() {
 			}
 		}
 		if (turnPlayer != -1) {
-			printf("turn: player %d\n", turnPlayer);   //í”Œë ˆì´ì–´ ì°¨ë¡€í‘œì‹œ
+			printf("turn: player %d\n", turnPlayer);   //ÇÃ·¹ÀÌ¾î Â÷·ÊÇ¥½Ã
 		}
 		
 		display();
@@ -80,8 +79,8 @@ void jebi() {
 					start = false;
 					if (surPlayers >= 2) {
 						system("cls");
-						printf("ìš°ìŠ¹ìë¥¼ ê°€ë¦¬ì§€ ëª»í–ˆìŠµë‹ˆë‹¤\n");
-						printf("--ì‚´ì•„ë‚¨ì€ í”Œë ˆì´ì–´--\n");
+						printf("¿ì½ÂÀÚ¸¦ °¡¸®Áö ¸øÇß½À´Ï´Ù\n");
+						printf("--»ì¾Æ³²Àº ÇÃ·¹ÀÌ¾î--\n");
 						for (int i = 0; i < n_player; i++) {
 							if (player[i].is_alive == true) {
 								turnPlayer = i;
@@ -148,8 +147,8 @@ void jebi() {
 						snprintf(log, sizeof(log), "player %d pass", turnPlayer);
 
 						dialog(log);
-							back_buf[cursorRow][cursorCol] = ' ';//?ë¥¼ ê³µë°±ìœ¼ë¡œ ë³€ê²½
-							// ê³µë°± ìœ„ì¹˜ ì˜¤ë¥¸ìª½ì— ìˆëŠ” ìˆ«ìë“¤ì„ ì™¼ìª½ìœ¼ë¡œ ì´ë™ (ì •ë ¬)
+							back_buf[cursorRow][cursorCol] = ' ';//?¸¦ °ø¹éÀ¸·Î º¯°æ
+							// °ø¹é À§Ä¡ ¿À¸¥ÂÊ¿¡ ÀÖ´Â ¼ıÀÚµéÀ» ¿ŞÂÊÀ¸·Î ÀÌµ¿ (Á¤·Ä)
 							cursorCol += 2;
 							
 							while (cursorCol < 20 && (back_buf[cursorRow][cursorCol] == false || back_buf[cursorRow][cursorCol] == '?')) {
@@ -186,11 +185,11 @@ void jebi() {
 			
 		}
 		
-		/*for (int i = 0; i < n_player; i++) {
+		for (int i = 0; i < 5; i++) {
 			if (player[i].is_alive == true) {
 				player[i].is_alive = true;
 			}
-		}*/
+		}
 		if (n_alive == 1) {
 			n_player = 1;
 			start = false;
@@ -203,7 +202,7 @@ void jebi() {
 
 
 
-void question(void) {     //í”Œë ˆì´ì–´ ìˆ˜ ëŒ€ë¡œ ? ë§Œë“¤ê¸°
+void question(void) {     //ÇÃ·¹ÀÌ¾î ¼ö ´ë·Î ? ¸¸µé±â
 	for (int i = 1; i < N_ROW + 5; i++) {
 		for (int j = 0; j < N_COL + 18 + n_player; j++) {
 			if (i == 2 && j % 2 == 1) {
@@ -219,7 +218,7 @@ void question(void) {     //í”Œë ˆì´ì–´ ìˆ˜ ëŒ€ë¡œ ? ë§Œë“¤ê¸°
 			
 
 void randq(void) {
-	// í˜„ì¬ '?'ì˜ ê°œìˆ˜ ì„¸ê¸°
+	// ÇöÀç '?'ÀÇ °³¼ö ¼¼±â
 	int totalQuestions = 0;
 	for (int i = 1; i < N_ROW + 5; i++) {
 		for (int j = 0; j < N_COL + 18 + n_player; j++) {
@@ -232,7 +231,7 @@ void randq(void) {
 	}
 
 	if (totalQuestions > 0) {
-		// ëœë¤ìœ¼ë¡œ ì„ íƒëœ '?' ì°¾ê¸°
+		// ·£´ıÀ¸·Î ¼±ÅÃµÈ '?' Ã£±â
 		int randomIndex = rand() % totalQuestions;
 		int currentCount = 0;
 
@@ -246,9 +245,9 @@ void randq(void) {
 								
 								back_buf[i][j] = false;
 
-								// ë³€ê²½ëœ ê°’ì„ ì¶œë ¥ (falseì¸ ê²½ìš°ì—ë§Œ '?'ë¡œ ì¶œë ¥)
+								// º¯°æµÈ °ªÀ» Ãâ·Â (falseÀÎ °æ¿ì¿¡¸¸ '?'·Î Ãâ·Â)
 								if (back_buf[i][j] == false) {
-									// í™”ë©´ì— '?' ì¶œë ¥
+									// È­¸é¿¡ '?' Ãâ·Â
 									gotoxy(i, j);
 									printf("?");
 								}

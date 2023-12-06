@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="jebi.c">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="jjuggumi.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -31,6 +28,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="nightgame.c">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="jebi.c">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

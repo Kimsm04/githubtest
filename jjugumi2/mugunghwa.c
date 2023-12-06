@@ -18,7 +18,9 @@ typedef enum _direction
 {
 	IDLE = 1, LEFT, UP, DOWN, RIGHT
 }direction;
-typedef enum _state { alive, dead, finished }state;		// 각 플레이어들의 상태를 나타내는 자료형
+typedef enum _state { 
+	alive, dead, finished 
+}state;		// 각 플레이어들의 상태를 나타내는 자료형
 typedef struct _tickState
 {
 	double goalTick;	// 트리거틱
